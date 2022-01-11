@@ -1,12 +1,13 @@
 --Show the number of lessons given per month during a specified year. 
 SELECT date_trunc('month', start_time) AS MONTH,
-	COUNT(id) AS COUNT,
+	COUNT(id) AS TOTAL,
 	COUNT(group_lesson_id) AS grouplesson,
 	COUNT(individual_lesson_id) AS individuallesson,
 	COUNT(ensemble_id) AS ensemble
 FROM class_type
 WHERE EXTRACT (YEAR FROM start_time) = 2021
 GROUP BY date_trunc ('month', start_time);
+
 
 --Retrieve the average number of lessons per month during the entire year.
 SELECT DATE_TRUNC('year',start_time) AS  year,
@@ -17,18 +18,27 @@ SELECT DATE_TRUNC('year',start_time) AS  year,
 FROM class_type
 GROUP BY DATE_TRUNC('year',start_time);
 
+
 --List all instructors who has given more than a specific number of lessons during the current month. 
 --Sum all lessons, independent of type, and sort the result by the number of given lessons.
-SELECT class_type.instructor_id AS instructor,
-	COUNT(id) AS nbrOfLessons
-FROM class_type
+CREATE VIEW Overworked AS
+SELECT c.instructor_id AS instructor,
+	i.id,
+	p.first_name AS firstname,
+	p.last_name AS lastname,
+	COUNT(c.id) AS nbrOfLessons
+FROM class_type as c
+INNER JOIN instructor as i on c.instructor_id =i.id
+INNER JOIN person_detail as p on i.person_detail_id=p.id
 WHERE date_trunc('month', start_time) = date_trunc('month', now())
-GROUP BY instructor_id
-HAVING COUNT(id) > 1
+GROUP BY i.id,c.instructor_id,p.first_name, p.last_name
+HAVING COUNT(c.id) > 0
 ORDER BY nbrOfLessons desc
+
 
 --List all ensembles held during the next week, sorted by music genre and weekday. 
 --For each ensemble tell whether it's full booked, has 1-2 seats left or has more seats left.
+CREATE VIEW SpotsLeftEnsemble AS
 SELECT start_time, end_time, type_of_instrument_or_genre,ensemble.minimum_nbr, 
 ensemble.maximum_nbr, ensemble.id,
 (CASE 
