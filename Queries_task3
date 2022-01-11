@@ -40,7 +40,7 @@ ORDER BY nbrOfLessons desc
 --For each ensemble tell whether it's full booked, has 1-2 seats left or has more seats left.
 CREATE VIEW SpotsLeftEnsemble AS
 SELECT start_time, end_time, type_of_instrument_or_genre,ensemble.minimum_nbr, 
-ensemble.maximum_nbr, ensemble.id,
+ensemble.maximum_nbr, ensemble.id, ensemble.spots_left,
 (CASE 
 	WHEN Spots_left = 0 THEN 'The class is full'
 	WHEN Spots_left = 1 THEN 'There is one spot left for this class'
